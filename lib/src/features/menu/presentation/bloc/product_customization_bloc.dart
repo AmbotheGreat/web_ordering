@@ -16,29 +16,45 @@ class ProductCustomizationBloc
   ProductCustomizationBloc(this._repository)
     : super(ProductCustomizationInitial()) {
     on<FetchProductCustomization>(_onFetchProductCustomization);
+    // Clear cache to ensure fresh fetch for debugging
+    print('🔄 ProductCustomizationBloc initialized, cache cleared');
+    _cache.clear();
   }
 
   Future<void> _onFetchProductCustomization(
     FetchProductCustomization event,
     Emitter<ProductCustomizationState> emit,
   ) async {
+    print(
+      '🔍 ProductCustomizationBloc: Fetching for barcode: ${event.barcode}',
+    );
+
     // Check cache first
     if (_cache.containsKey(event.barcode)) {
+      print('✅ Found in cache for barcode: ${event.barcode}');
       emit(ProductCustomizationLoaded(_cache[event.barcode]!));
       return;
     }
 
+    print('⏳ Loading customizations for barcode: ${event.barcode}');
     emit(ProductCustomizationLoading());
 
     try {
+      print('📡 calling repository.fetchProductCustomizationByBarcode...');
       final customizations = await _repository
-          .fetchProductCustomizationByBarcode(event.barcode, event.branchId);
+          .fetchProductCustomizationByBarcode(event.barcode, event.branchId)
+          .timeout(const Duration(seconds: 3)); // Add timeout
+
+      print(
+        '✅ Fetched ${customizations.length} customizations for barcode: ${event.barcode}',
+      );
 
       // Store in cache
       _cache[event.barcode] = customizations;
 
       emit(ProductCustomizationLoaded(customizations));
     } catch (e) {
+      print('❌ Error fetching customizations: $e');
       emit(ProductCustomizationError(e.toString()));
     }
   }

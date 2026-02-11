@@ -39,15 +39,28 @@ class MenuRepository {
     int branchId,
   ) async {
     try {
+      print(
+        '📡 Calling edge function for barcode: $barcode, branchId: $branchId',
+      );
+
       final response = await _client.functions.invoke(
         'get-product-customizations',
         body: {'barcode': barcode, 'branch_id': branchId},
       );
 
+      print('📦 Edge function response status: ${response.status}');
+      print('📦 Edge function response data: ${response.data}');
+
       if (response.data != null) {
+        // The API returns {barcode: "...", option_groups: [...]}
+        // Extract option_groups from the response
         final List<dynamic> customizationsData = response.data is List
             ? response.data
-            : (response.data['customizations'] ?? []);
+            : (response.data['option_groups'] ??
+                  []); // Changed from 'customizations' to 'option_groups'
+
+        print('📋 Parsed customizations data: $customizationsData');
+        print('📊 Number of customizations: ${customizationsData.length}');
 
         return customizationsData
             .map(
@@ -57,8 +70,10 @@ class MenuRepository {
             .toList();
       }
 
+      print('⚠️ Edge function returned null data');
       return [];
     } catch (e) {
+      print('❌ Edge function error: $e');
       throw Exception('Failed to fetch product customizations: $e');
     }
   }

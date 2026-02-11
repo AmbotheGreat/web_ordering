@@ -8,7 +8,9 @@ import 'package:web_ordering/src/features/menu/domain/models/item.dart';
 import 'package:web_ordering/src/features/menu/domain/models/product_customization.dart';
 import 'package:web_ordering/src/features/menu/presentation/bloc/product_customization_bloc.dart';
 import 'package:web_ordering/src/features/home/presentation/widgets/quantity_selector.dart';
+import 'package:web_ordering/src/features/home/presentation/widgets/customization_selector.dart';
 import 'package:web_ordering/src/features/cart/providers/cart_provider.dart';
+import 'package:web_ordering/src/features/cart/domain/models/cart_item.dart';
 
 /// Item details screen showing full information and add to cart functionality
 class ItemDetailsScreen extends StatefulWidget {
@@ -22,20 +24,46 @@ class ItemDetailsScreen extends StatefulWidget {
 
 class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
   int _quantity = 1;
+  List<ProductCustomizationModel> _customizations = [];
+  final Map<int, List<int>> _selectedCustomizations =
+      {}; // {groupId: [optionIds]}
+  Set<int> _errorCustomizationIds = {};
 
-  double get _totalPrice => widget.item.price * _quantity;
+  double get _customizationTotal {
+    double total = 0.0;
+    for (var entry in _selectedCustomizations.entries) {
+      final groupId = entry.key;
+      final optionIds = entry.value;
+      final group = _customizations.firstWhere((c) => c.id == groupId);
+      for (var optionId in optionIds) {
+        final option = group.options.firstWhere((o) => o.id == optionId);
+        total += option.price ?? 0.0;
+      }
+    }
+    return total;
+  }
+
+  double get _totalPrice =>
+      (widget.item.price + _customizationTotal) * _quantity;
 
   @override
   void initState() {
     super.initState();
     // Fetch customizations when screen loads if item has barcode
+    // Use WidgetsBinding to ensure context is ready
     if (widget.item.barcode != null && widget.item.barcode!.isNotEmpty) {
-      context.read<ProductCustomizationBloc>().add(
-        FetchProductCustomization(
-          barcode: widget.item.barcode!,
-          branchId: widget.item.branchId,
-        ),
-      );
+      print('📱 ItemDetailsScreen: Item has barcode: ${widget.item.barcode}');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        print('🚀 Triggering FetchProductCustomization event');
+        context.read<ProductCustomizationBloc>().add(
+          FetchProductCustomization(
+            barcode: widget.item.barcode!,
+            branchId: widget.item.branchId,
+          ),
+        );
+      });
+    } else {
+      print('⚠️ ItemDetailsScreen: Item has no barcode');
     }
   }
 
@@ -108,7 +136,10 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                         ProductCustomizationState
                       >(
                         builder: (context, state) {
+                          print('🎨 BlocBuilder state: ${state.runtimeType}');
+
                           if (state is ProductCustomizationLoading) {
+                            print('⏳ Showing loading indicator');
                             return const Center(
                               child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 20),
@@ -117,64 +148,81 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                 ),
                               ),
                             );
-                          } else if (state is ProductCustomizationLoaded &&
-                              state.customizations.isNotEmpty) {
+                          } else if (state is ProductCustomizationLoaded) {
+                            if (state.customizations.isEmpty) {
+                              print(
+                                '⚠️ ProductCustomizationLabel: Loaded but empty list',
+                              );
+                              return const SizedBox.shrink();
+                            }
+
+                            print(
+                              '✅ Showing ${state.customizations.length} customizations',
+                            );
+
+                            // Update customizations state
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (_customizations != state.customizations) {
+                                Future.microtask(() {
+                                  if (mounted) {
+                                    setState(() {
+                                      _customizations = state.customizations;
+                                    });
+                                  }
+                                });
+                              }
+                            });
+
                             return Column(
-                              children: _buildCustomizationsSection(
-                                state.customizations,
-                              ),
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 20,
+                              children: state.customizations.map((
+                                customization,
+                              ) {
+                                return CustomizationSelector(
+                                  customization: customization,
+                                  hasError: _errorCustomizationIds.contains(
+                                    customization.id,
+                                  ),
+                                  onSelectionChanged: (selectedOptionIds) {
+                                    // If user makes a selection, remove error state
+                                    if (_errorCustomizationIds.contains(
+                                          customization.id,
+                                        ) &&
+                                        selectedOptionIds.isNotEmpty) {
+                                      setState(() {
+                                        _errorCustomizationIds.remove(
+                                          customization.id,
+                                        );
+                                      });
+                                    }
+
+                                    setState(() {
+                                      if (selectedOptionIds.isEmpty) {
+                                        _selectedCustomizations.remove(
+                                          customization.id,
+                                        );
+                                      } else {
+                                        _selectedCustomizations[customization
+                                                .id] =
+                                            selectedOptionIds;
+                                      }
+                                    });
+                                  },
+                                );
+                              }).toList(),
                             );
                           } else if (state is ProductCustomizationError) {
+                            print('❌ Error state: ${state.message}');
                             // Silently fail - show nothing if error
                             return const SizedBox.shrink();
                           }
+                          print('🔲 Showing nothing (initial or empty state)');
                           return const SizedBox.shrink();
                         },
                       ),
 
                     const SizedBox(height: 12),
-
-                    // Price
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                width: 1,
-                              ),
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: QuantitySelector(
-                              quantity: _quantity,
-                              onQuantityChanged: (newQuantity) {
-                                setState(() => _quantity = newQuantity);
-                              },
-                            ),
-                          ),
-                          Text(
-                            '₱${widget.item.price.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.error,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 30),
                   ],
                 ),
               ),
@@ -199,18 +247,31 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Total :',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              width: 1,
+                            ),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: QuantitySelector(
+                            quantity: _quantity,
+                            onQuantityChanged: (newQuantity) {
+                              setState(() => _quantity = newQuantity);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                     Text(
                       '₱${_totalPrice.toStringAsFixed(2)}',
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
                       ),
@@ -273,82 +334,78 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
     );
   }
 
-  List<Widget> _buildCustomizationsSection(
-    List<ProductCustomizationModel> customizations,
-  ) {
-    return [
-      const SizedBox(height: 20),
-      const Text(
-        'Customizations',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimary,
-        ),
-      ),
-      const SizedBox(height: 12),
-      ...customizations.map((customization) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundLight,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade300, width: 1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                customization.name,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              if (customization.description != null &&
-                  customization.description!.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  customization.description!,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-              ],
-              const SizedBox(height: 12),
-              ...customization.options.map((option) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          option.name,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      if (option.price != null && option.price! > 0)
-                        Text(
-                          '+₱${option.price!.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              }),
-            ],
+  void _addToCart() {
+    // Validate required customizations
+    final Set<int> newErrors = {};
+
+    for (var customization in _customizations) {
+      if (customization.isRequired) {
+        if (!_selectedCustomizations.containsKey(customization.id) ||
+            _selectedCustomizations[customization.id]!.isEmpty) {
+          newErrors.add(customization.id);
+        }
+      }
+    }
+
+    if (newErrors.isNotEmpty) {
+      setState(() {
+        _errorCustomizationIds = newErrors;
+      });
+      return;
+    }
+
+    // Clear errors if validation passes
+    if (_errorCustomizationIds.isNotEmpty) {
+      setState(() {
+        _errorCustomizationIds.clear();
+      });
+    }
+
+    // Build SelectedCustomization list
+    final List<SelectedCustomization> selectedCustomizations = [];
+    for (var entry in _selectedCustomizations.entries) {
+      final groupId = entry.key;
+      final optionIds = entry.value;
+      final group = _customizations.firstWhere((c) => c.id == groupId);
+
+      for (var optionId in optionIds) {
+        final option = group.options.firstWhere((o) => o.id == optionId);
+        selectedCustomizations.add(
+          SelectedCustomization(
+            groupId: group.id,
+            groupName: group.name,
+            optionId: option.id,
+            optionName:
+                (group.name.toLowerCase().contains('sugar')) &&
+                    double.tryParse(option.name) != null
+                ? '${option.name}%'
+                : option.name,
+            priceDelta: option.price ?? 0.0,
           ),
         );
-      }),
-    ];
+      }
+    }
+
+    // Add to cart
+    context.read<CartProvider>().addToCart(
+      widget.item,
+      _quantity,
+      customizations: selectedCustomizations,
+    );
+
+    // Show success toast
+    toastification.show(
+      context: context,
+      type: ToastificationType.success,
+      style: ToastificationStyle.fillColored,
+      title: const Text('Added to Cart'),
+      description: Text('${widget.item.name} has been added to your cart'),
+      autoCloseDuration: const Duration(seconds: 2),
+      alignment: Alignment.topCenter,
+    );
+
+    // Navigate back
+    context.go('/menu');
   }
 
   Widget _buildItemImage() {
@@ -361,38 +418,5 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
       );
     }
     return const Icon(Icons.coffee, size: 100, color: AppColors.textSecondary);
-  }
-
-  void _addToCart() {
-    // Add to cart using provider
-    final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    cartProvider.addToCart(widget.item, _quantity);
-
-    // Show success notification with toastification
-    toastification.show(
-      context: context,
-      type: ToastificationType.success,
-      style: ToastificationStyle.fillColored,
-      title: const Text('Added to cart!'),
-      alignment: Alignment.topCenter,
-      autoCloseDuration: const Duration(seconds: 2),
-      primaryColor: const Color.fromARGB(255, 36, 217, 42),
-      backgroundColor: const Color.fromARGB(255, 1, 255, 9),
-      foregroundColor: Colors.white,
-      icon: const Icon(Icons.check_circle),
-      showProgressBar: true,
-      closeButtonShowType: CloseButtonShowType.onHover,
-      closeOnClick: true,
-      pauseOnHover: true,
-      dragToClose: true,
-      applyBlurEffect: false,
-    );
-
-    // Navigate back to menu after adding to cart
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    });
   }
 }

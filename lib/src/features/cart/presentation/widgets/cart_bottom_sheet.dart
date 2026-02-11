@@ -175,6 +175,55 @@ class CartBottomSheet extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
+                    // Display customizations if any
+                    if (cartItem.selectedCustomizations.isNotEmpty) ...[
+                      ...cartItem.selectedCustomizations.map((customization) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.circle,
+                                size: 4,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: RichText(
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey[600],
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: '${customization.groupName}: ',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      TextSpan(text: customization.optionName),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (customization.priceDelta > 0)
+                                Text(
+                                  '+₱${customization.priceDelta.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      const SizedBox(height: 4),
+                    ],
                     Row(
                       children: [
                         // Quantity controls

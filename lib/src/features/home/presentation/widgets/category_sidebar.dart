@@ -49,7 +49,7 @@ class CategorySidebar extends StatelessWidget {
                   color: isSelected
                       ? AppColors.textSecondary
                       : AppColors.textPrimary,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontWeight: FontWeight.bold,
                   fontSize: 8,
                 ),
                 textAlign: TextAlign.center,

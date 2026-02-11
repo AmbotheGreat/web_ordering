@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) =>
               MasterBloc(MenuRepository())
-                ..add(const FetchMasterData(branchId: 8)),
+                ..add(const FetchMasterData(branchId: 3)),
         ),
         BlocProvider(
           create: (context) => ProductCustomizationBloc(MenuRepository()),
@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
+        // ignore: deprecated_member_use
         useInheritedMediaQuery: true,
         locale: DevicePreview.locale(context),
         builder: DevicePreview.appBuilder,

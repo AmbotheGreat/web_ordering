@@ -31,7 +31,11 @@ class CartProvider extends ChangeNotifier {
   }
 
   /// Add item to cart or update quantity if already exists
-  void addToCart(ItemModel item, int quantity) {
+  void addToCart(
+    ItemModel item,
+    int quantity, {
+    List<SelectedCustomization> customizations = const [],
+  }) {
     final existingIndex = _items.indexWhere(
       (cartItem) => cartItem.item.id == item.id,
     );
@@ -41,7 +45,13 @@ class CartProvider extends ChangeNotifier {
       _items[existingIndex].quantity += quantity;
     } else {
       // New item, add to cart
-      _items.add(CartItem(item: item, quantity: quantity));
+      _items.add(
+        CartItem(
+          item: item,
+          quantity: quantity,
+          selectedCustomizations: customizations,
+        ),
+      );
     }
 
     notifyListeners();

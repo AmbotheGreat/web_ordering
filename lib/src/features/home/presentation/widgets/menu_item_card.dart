@@ -48,7 +48,11 @@ class MenuItemCard extends StatelessWidget {
                       ),
                     )
                   : const Center(
-                      child: Icon(Icons.coffee, size: 50, color: Colors.grey),
+                      child: Icon(
+                        Icons.broken_image,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
                     ),
             ),
             Padding(

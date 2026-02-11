@@ -28,11 +28,11 @@ class QuantitySelector extends StatelessWidget {
               : null,
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Text(
             quantity.toString(),
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
@@ -61,8 +61,8 @@ class QuantitySelector extends StatelessWidget {
         icon: Icon(icon),
         color: AppColors.textSecondary,
         onPressed: onPressed,
-        padding: const EdgeInsets.all(8),
-        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+        padding: const EdgeInsets.all(4),
+        constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
       ),
     );
   }
