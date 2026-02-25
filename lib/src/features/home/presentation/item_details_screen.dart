@@ -25,8 +25,7 @@ class ItemDetailsScreen extends StatefulWidget {
 class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
   int _quantity = 1;
   List<ProductCustomizationModel> _customizations = [];
-  final Map<int, List<int>> _selectedCustomizations =
-      {}; // {groupId: [optionIds]}
+  final Map<int, List<int>> _selectedCustomizations = {}; // {groupId: [optionIds]}
   Set<int> _errorCustomizationIds = {};
 
   double get _customizationTotal {
@@ -43,8 +42,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
     return total;
   }
 
-  double get _totalPrice =>
-      (widget.item.price + _customizationTotal) * _quantity;
+  double get _totalPrice => (widget.item.price + _customizationTotal) * _quantity;
 
   @override
   void initState() {
@@ -129,12 +127,8 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                     const SizedBox(height: 12),
 
                     // Product Customizations Section (On-Demand)
-                    if (widget.item.barcode != null &&
-                        widget.item.barcode!.isNotEmpty)
-                      BlocBuilder<
-                        ProductCustomizationBloc,
-                        ProductCustomizationState
-                      >(
+                    if (widget.item.barcode != null && widget.item.barcode!.isNotEmpty)
+                      BlocBuilder<ProductCustomizationBloc, ProductCustomizationState>(
                         builder: (context, state) {
                           print('🎨 BlocBuilder state: ${state.runtimeType}');
 
@@ -203,9 +197,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                           customization.id,
                                         );
                                       } else {
-                                        _selectedCustomizations[customization
-                                                .id] =
-                                            selectedOptionIds;
+                                        _selectedCustomizations[customization.id] = selectedOptionIds;
                                       }
                                     });
                                   },
@@ -375,13 +367,12 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
             groupId: group.id,
             groupName: group.name,
             optionId: option.id,
-            optionName:
-                (group.name.toLowerCase().contains('sugar')) &&
-                    double.tryParse(option.name) != null
+            optionName: (group.name.toLowerCase().contains('sugar')) && double.tryParse(option.name) != null
                 ? '${option.name}%'
                 : option.name,
             priceDelta: option.price ?? 0.0,
             barcode: option.barcode, // Added barcode mapping
+            localId: option.localId,
           ),
         );
       }

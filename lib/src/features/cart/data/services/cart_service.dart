@@ -6,8 +6,7 @@ import 'package:web_ordering/src/features/cart/domain/models/cart_item.dart';
 class CartService {
   final SupabaseClient _supabase;
 
-  CartService({SupabaseClient? supabase})
-    : _supabase = supabase ?? Supabase.instance.client;
+  CartService({SupabaseClient? supabase}) : _supabase = supabase ?? Supabase.instance.client;
 
   Future<String> _getDeviceId() async {
     String deviceId = 'flutter-app';
@@ -56,7 +55,7 @@ class CartService {
             if (!formattedCustomizations.containsKey(c.groupName)) {
               formattedCustomizations[c.groupName] = [];
             }
-            formattedCustomizations[c.groupName]!.add(c.barcode ?? '');
+            formattedCustomizations[c.groupName]!.add(c.localId ?? c.barcode ?? '');
           }
           itemData['item_customization'] = formattedCustomizations;
         }
