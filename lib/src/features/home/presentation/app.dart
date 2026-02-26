@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) =>
               MasterBloc(MenuRepository())
-                ..add(const FetchMasterData(branchId: 3)),
+                ..add(const FetchMasterData(branchId: 1)),
         ),
         BlocProvider(
           create: (context) => ProductCustomizationBloc(MenuRepository()),

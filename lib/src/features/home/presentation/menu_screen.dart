@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:web_ordering/src/features/menu/domain/models/category.dart';
 import 'package:web_ordering/src/features/menu/domain/models/item.dart';
@@ -131,7 +132,10 @@ class _MenuScreenState extends State<MenuScreen> {
         return MenuItemCard(
           item: filteredItems[index],
           onAddPressed: () {
-            // TODO: Add item to cart
+            context.push(
+              '/item/${filteredItems[index].id}',
+              extra: filteredItems[index],
+            );
           },
         );
       },

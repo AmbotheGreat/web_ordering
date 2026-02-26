@@ -7,6 +7,7 @@ class SelectedCustomization {
   final int optionId;
   final String optionName;
   final double priceDelta;
+  final String? barcode;
 
   SelectedCustomization({
     required this.groupId,
@@ -14,6 +15,7 @@ class SelectedCustomization {
     required this.optionId,
     required this.optionName,
     required this.priceDelta,
+    this.barcode,
   });
 }
 
@@ -22,11 +24,13 @@ class CartItem {
   final ItemModel item;
   int quantity;
   final List<SelectedCustomization> selectedCustomizations;
+  final String? note;
 
   CartItem({
     required this.item,
     required this.quantity,
     this.selectedCustomizations = const [],
+    this.note,
   });
 
   /// Calculate customization total
@@ -43,12 +47,14 @@ class CartItem {
   CartItem copyWith({
     int? quantity,
     List<SelectedCustomization>? selectedCustomizations,
+    String? note,
   }) {
     return CartItem(
       item: item,
       quantity: quantity ?? this.quantity,
       selectedCustomizations:
           selectedCustomizations ?? this.selectedCustomizations,
+      note: note ?? this.note,
     );
   }
 }

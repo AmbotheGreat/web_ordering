@@ -52,8 +52,14 @@ class CustomizationOption {
   final int id;
   final String name;
   final double? price;
+  final String? barcode;
 
-  CustomizationOption({required this.id, required this.name, this.price});
+  CustomizationOption({
+    required this.id,
+    required this.name,
+    this.price,
+    this.barcode,
+  });
 
   factory CustomizationOption.fromJson(Map<String, dynamic> json) {
     return CustomizationOption(
@@ -64,10 +70,11 @@ class CustomizationOption {
           : (json['price'] != null
                 ? (json['price'] as num).toDouble()
                 : null), // API uses 'price_delta'
+      barcode: json['barcode'],
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'price': price};
+    return {'id': id, 'name': name, 'price': price, 'barcode': barcode};
   }
 }

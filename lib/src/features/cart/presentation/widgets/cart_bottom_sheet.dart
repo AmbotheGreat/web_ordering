@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web_ordering/src/core/theme/app_colors.dart';
 import 'package:web_ordering/src/features/cart/providers/cart_provider.dart';
+import 'package:web_ordering/src/features/cart/data/services/cart_service.dart'
+    as web_ordering_cart_service;
 
 /// Bottom sheet widget displaying cart contents
 class CartBottomSheet extends StatelessWidget {
@@ -364,16 +366,7 @@ class CartBottomSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement checkout
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Checkout feature coming soon!'),
-                        backgroundColor: AppColors.primary,
-                      ),
-                    );
-                  },
+                  onPressed: () => _showCheckoutDialog(context, cart),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textSecondary,
@@ -395,6 +388,117 @@ class CartBottomSheet extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _showCheckoutDialog(
+    BuildContext context,
+    CartProvider cart,
+  ) async {
+    final nameController = TextEditingController();
+    bool isLoading = false;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Checkout Details'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Please enter your name for the order:'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Customer Name',
+                      border: OutlineInputBorder(),
+                    ),
+                    enabled: !isLoading,
+                  ),
+                ],
+              ),
+              actions: [
+                if (!isLoading)
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('Cancel'),
+                  ),
+                ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          final name = nameController.text.trim();
+                          if (name.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please enter your name'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          setState(() {
+                            isLoading = true;
+                          });
+
+                          try {
+                            // Let the service handle device OS detection and Supabase networking
+                            final cartService =
+                                web_ordering_cart_service.CartService();
+                            await cartService.submitOrder(
+                              customerName: name,
+                              items: cart.items,
+                            );
+
+                            cart.clearCart();
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext);
+                            }
+                            if (context.mounted) {
+                              Navigator.pop(context); // Close bottom sheet
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Order submitted successfully!',
+                                  ),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            print('=== ORDER ERROR CAUGHT ===');
+                            print(e.toString());
+                            setState(() {
+                              isLoading = false;
+                            });
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: ${e.toString()}'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Submit Order'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

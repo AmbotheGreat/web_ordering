@@ -381,6 +381,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 ? '${option.name}%'
                 : option.name,
             priceDelta: option.price ?? 0.0,
+            barcode: option.barcode, // Added barcode mapping
           ),
         );
       }
