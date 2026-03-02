@@ -8,6 +8,7 @@ class SelectedCustomization {
   final String optionName;
   final double priceDelta;
   final String? barcode;
+  final String? localId;
 
   SelectedCustomization({
     required this.groupId,
@@ -16,6 +17,7 @@ class SelectedCustomization {
     required this.optionName,
     required this.priceDelta,
     this.barcode,
+    this.localId,
   });
 }
 
@@ -34,8 +36,7 @@ class CartItem {
   });
 
   /// Calculate customization total
-  double get customizationTotal =>
-      selectedCustomizations.fold(0.0, (sum, c) => sum + c.priceDelta);
+  double get customizationTotal => selectedCustomizations.fold(0.0, (sum, c) => sum + c.priceDelta);
 
   /// Calculate base price (item price * quantity)
   double get basePrice => item.price * quantity;
@@ -52,8 +53,7 @@ class CartItem {
     return CartItem(
       item: item,
       quantity: quantity ?? this.quantity,
-      selectedCustomizations:
-          selectedCustomizations ?? this.selectedCustomizations,
+      selectedCustomizations: selectedCustomizations ?? this.selectedCustomizations,
       note: note ?? this.note,
     );
   }

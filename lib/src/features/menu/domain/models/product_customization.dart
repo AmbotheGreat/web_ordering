@@ -53,12 +53,14 @@ class CustomizationOption {
   final String name;
   final double? price;
   final String? barcode;
+  final String? localId;
 
   CustomizationOption({
     required this.id,
     required this.name,
     this.price,
     this.barcode,
+    this.localId,
   });
 
   factory CustomizationOption.fromJson(Map<String, dynamic> json) {
@@ -67,14 +69,13 @@ class CustomizationOption {
       name: json['label'] ?? json['name'] ?? '', // API uses 'label'
       price: json['price_delta'] != null
           ? (json['price_delta'] as num).toDouble()
-          : (json['price'] != null
-                ? (json['price'] as num).toDouble()
-                : null), // API uses 'price_delta'
+          : (json['price'] != null ? (json['price'] as num).toDouble() : null), // API uses 'price_delta'
       barcode: json['barcode'],
+      localId: json['local_id']?.toString(), // Handle both string and int just in case
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'price': price, 'barcode': barcode};
+    return {'id': id, 'name': name, 'price': price, 'barcode': barcode, 'local_id': localId};
   }
 }
