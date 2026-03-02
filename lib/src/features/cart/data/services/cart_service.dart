@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_ordering/src/features/cart/domain/models/cart_item.dart';
@@ -35,7 +36,7 @@ class CartService {
   ) {
     return {
       'order_type_id': 1,
-      'order_status': 0,
+      'order_status': 1,
       'branch_id': 1, // Currently hardcoded to 1
       'customer_name': customerName,
       'items': items.map((item) {
@@ -66,7 +67,7 @@ class CartService {
     };
   }
 
-  Future<void> submitOrder({
+  Future<String> submitOrder({
     required String customerName,
     required List<CartItem> items,
   }) async {
@@ -90,10 +91,59 @@ class CartService {
     print('=== ORDER COMPLETED ===');
     print('Status Code: ${response.status}');
     print('Response Data: ${response.data}');
+    print('Response Data Type: ${response.data.runtimeType}');
 
     if (response.status != 200 && response.status != 201) {
       print('Submission Error Data: ${response.data}');
       throw Exception('Failed to submit order: ${response.status}');
     }
+
+    dynamic data = response.data;
+    if (data is String) {
+      try {
+        data = jsonDecode(data);
+      } catch (_) {}
+    }
+
+    print('=== PARSED DATA TYPE: ${data.runtimeType} ===');
+    print('=== PARSED DATA: $data ===');
+
+    // Helper to extract order_key from any map level
+    String? _extractKey(dynamic d) {
+      if (d is! Map) return null;
+      // Direct keys
+      for (final k in [
+        'order_key',
+        'orderKey',
+        'order_number',
+        'orderNumber',
+        'key',
+      ]) {
+        final v = d[k]?.toString();
+        if (v != null && v.isNotEmpty) return v;
+      }
+      // One level deeper (e.g. { data: { order_key: ... } } or { order: { order_key: ... } })
+      for (final k in ['data', 'order', 'result', 'payload']) {
+        final nested = d[k];
+        final v = _extractKey(nested);
+        if (v != null) return v;
+      }
+      // Last resort: numeric id
+      final id = d['id']?.toString();
+      if (id != null && id.isNotEmpty) return id;
+      return null;
+    }
+
+    final orderKey = _extractKey(data);
+    print('=== EXTRACTED ORDER KEY: "$orderKey" ===');
+    if (orderKey != null && orderKey.isNotEmpty) return orderKey;
+
+    if (data is String && data.isNotEmpty) {
+      print('=== DATA IS STRING: "$data" ===');
+      return data;
+    }
+
+    print('=== WARNING: Could not extract order key from response ===');
+    return '';
   }
 }

@@ -15,7 +15,7 @@ class CartFloatingButton extends StatelessWidget {
       child: GestureDetector(
         onTap: onPressed,
         child: Container(
-          height: 40,
+          height: 50,
           width: MediaQuery.of(context).size.width * 0.8,
           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
           decoration: BoxDecoration(

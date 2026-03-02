@@ -257,7 +257,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                               width: 1,
                             ),
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: QuantitySelector(
                             quantity: _quantity,

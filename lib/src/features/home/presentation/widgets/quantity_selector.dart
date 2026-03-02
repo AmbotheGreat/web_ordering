@@ -52,18 +52,12 @@ class QuantitySelector extends StatelessWidget {
     required IconData icon,
     required VoidCallback? onPressed,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: onPressed != null ? AppColors.primary : AppColors.borderLight,
-        shape: BoxShape.circle,
-      ),
-      child: IconButton(
-        icon: Icon(icon),
-        color: AppColors.textSecondary,
-        onPressed: onPressed,
-        padding: const EdgeInsets.all(4),
-        constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-      ),
+    return IconButton(
+      icon: Icon(icon),
+      color: AppColors.primary,
+      onPressed: onPressed,
+      padding: const EdgeInsets.all(4),
+      constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
     );
   }
 }

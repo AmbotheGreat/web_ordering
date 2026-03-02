@@ -4,6 +4,7 @@ import 'package:web_ordering/src/core/theme/app_colors.dart';
 import 'package:web_ordering/src/features/cart/providers/cart_provider.dart';
 import 'package:web_ordering/src/features/cart/data/services/cart_service.dart'
     as web_ordering_cart_service;
+import 'package:go_router/go_router.dart';
 
 /// Bottom sheet widget displaying cart contents
 class CartBottomSheet extends StatelessWidget {
@@ -392,109 +393,250 @@ class CartBottomSheet extends StatelessWidget {
   }
 
   Future<void> _showCheckoutDialog(
-    BuildContext context,
+    BuildContext parentContext,
     CartProvider cart,
   ) async {
     final nameController = TextEditingController();
     bool isLoading = false;
+    String? nameError;
 
     await showDialog(
-      context: context,
+      context: parentContext,
       barrierDismissible: false,
       builder: (dialogContext) {
         return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Checkout Details'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Please enter your name for the order:'),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Customer Name',
-                      border: OutlineInputBorder(),
-                    ),
-                    enabled: !isLoading,
-                  ),
-                ],
-              ),
-              actions: [
-                if (!isLoading)
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext),
-                    child: const Text('Cancel'),
-                  ),
-                ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          final name = nameController.text.trim();
-                          if (name.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please enter your name'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                            return;
-                          }
-
-                          setState(() {
-                            isLoading = true;
-                          });
-
-                          try {
-                            // Let the service handle device OS detection and Supabase networking
-                            final cartService =
-                                web_ordering_cart_service.CartService();
-                            await cartService.submitOrder(
-                              customerName: name,
-                              items: cart.items,
-                            );
-
-                            cart.clearCart();
-                            if (dialogContext.mounted) {
-                              Navigator.pop(dialogContext);
-                            }
-                            if (context.mounted) {
-                              Navigator.pop(context); // Close bottom sheet
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Order submitted successfully!',
-                                  ),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            print('=== ORDER ERROR CAUGHT ===');
-                            print(e.toString());
-                            setState(() {
-                              isLoading = false;
-                            });
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Error: ${e.toString()}'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          }
-                        },
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Submit Order'),
+          builder: (stateContext, setState) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Theme.of(dialogContext).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-              ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title and Subtitle
+                    const Text(
+                      'Proceed to Checkout',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Please enter your name for the order:',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Name field with inline validation
+                    TextField(
+                      controller: nameController,
+                      enabled: !isLoading,
+                      textCapitalization: TextCapitalization.words,
+                      onChanged: (_) {
+                        if (nameError != null) setState(() => nameError = null);
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Customer Name',
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        errorText: nameError,
+                        prefixIcon: const Icon(
+                          Icons.person,
+                          color: Colors.grey,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Theme.of(dialogContext).primaryColor,
+                            width: 2,
+                          ),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 1.5,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Balanced Action Buttons
+                    Row(
+                      children: [
+                        if (!isLoading) ...[
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                side: BorderSide(color: Colors.grey.shade300),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: const Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isLoading
+                                ? null
+                                : () async {
+                                    final name = nameController.text.trim();
+                                    if (name.isEmpty) {
+                                      setState(() {
+                                        nameError = 'Customer name is required';
+                                      });
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      isLoading = true;
+                                    });
+
+                                    try {
+                                      // Let the service handle device OS detection and Supabase networking
+                                      final cartService =
+                                          web_ordering_cart_service.CartService();
+                                      final orderKey = await cartService
+                                          .submitOrder(
+                                            customerName: name,
+                                            items: cart.items,
+                                          );
+
+                                      print(
+                                        '=== NAVIGATION: orderKey="$orderKey" ===',
+                                      );
+
+                                      // Snapshot items BEFORE clearing the cart
+                                      final orderedItems = List.of(cart.items);
+                                      cart.clearCart();
+
+                                      // Capture the router BEFORE popping to avoid
+                                      // using an unmounted context after navigation.
+                                      final router = GoRouter.of(parentContext);
+
+                                      if (dialogContext.mounted) {
+                                        Navigator.pop(
+                                          dialogContext,
+                                        ); // Close dialog
+                                      }
+                                      if (parentContext.mounted) {
+                                        Navigator.pop(
+                                          parentContext,
+                                        ); // Close bottom sheet
+                                      }
+
+                                      // Navigate using the router captured before pops.
+                                      if (orderKey.isNotEmpty) {
+                                        router.push(
+                                          '/qr',
+                                          extra: {
+                                            'orderKey': orderKey,
+                                            'items': orderedItems,
+                                          },
+                                        );
+                                      } else {
+                                        // orderKey extraction failed — still show success
+                                        ScaffoldMessenger.of(
+                                          parentContext,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Order submitted successfully!',
+                                            ),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      print('=== ORDER ERROR CAUGHT ===');
+                                      print(e.toString());
+                                      setState(() {
+                                        isLoading = false;
+                                      });
+                                      if (stateContext.mounted) {
+                                        ScaffoldMessenger.of(
+                                          stateContext,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Error: ${e.toString()}',
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Submit Order',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         );
