@@ -1,17 +1,22 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_ordering/src/features/menu/domain/models/category.dart';
+import 'package:web_ordering/src/features/menu/domain/models/department.dart';
 import 'package:web_ordering/src/features/menu/domain/models/item.dart';
 import 'package:web_ordering/src/features/menu/domain/models/product_customization.dart';
 
 class MenuRepository {
   final SupabaseClient _client = Supabase.instance.client;
 
-  Future<List<CategoryModel>> fetchCategories(int branchId) async {
+  Future<List<CategoryModel>> fetchCategories(
+    int branchId,
+    int departmentId,
+  ) async {
     try {
       final response = await _client
           .from('categories')
           .select()
           .eq('branch_id', branchId)
+          .eq('department_id', departmentId)
           .eq('status', true)
           .order('ordering_index', ascending: true);
 
@@ -21,15 +26,31 @@ class MenuRepository {
     }
   }
 
-  Future<List<ItemModel>> fetchItems(int branchId) async {
+  Future<List<ItemModel>> fetchItems(int branchId, int departmentId) async {
     try {
       final response = await _client
           .from('items')
           .select()
-          .eq('branch_id', branchId);
+          .eq('branch_id', branchId)
+          .eq('department_id', departmentId);
       return (response as List).map((e) => ItemModel.fromJson(e)).toList();
     } catch (e) {
       throw Exception('Failed to fetch items: $e');
+    }
+  }
+
+  Future<List<DepartmentModel>> fetchDepartments(int branchId) async {
+    try {
+      final response = await _client
+          .from('departments')
+          .select()
+          .eq('branch_id', branchId)
+          .order('dept_id', ascending: true);
+      return (response as List)
+          .map((e) => DepartmentModel.fromJson(e))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to fetch departments: $e');
     }
   }
 

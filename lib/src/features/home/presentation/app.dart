@@ -11,15 +11,15 @@ import 'package:web_ordering/src/features/cart/providers/cart_provider.dart';
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // MasterBloc: fetches departments on startup, then categories+items on selection
         BlocProvider(
           create: (context) =>
               MasterBloc(MenuRepository())
-                ..add(const FetchMasterData(branchId: 1)),
+                ..add(const FetchDepartments(branchId: 1)),
         ),
         BlocProvider(
           create: (context) => ProductCustomizationBloc(MenuRepository()),
