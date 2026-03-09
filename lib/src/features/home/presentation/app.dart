@@ -7,6 +7,7 @@ import 'package:web_ordering/src/features/menu/data/repositories/menu_repository
 import 'package:web_ordering/src/features/menu/presentation/bloc/master_bloc.dart';
 import 'package:web_ordering/src/features/menu/presentation/bloc/product_customization_bloc.dart';
 import 'package:web_ordering/src/features/cart/providers/cart_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) =>
               MasterBloc(MenuRepository())
-                ..add(const FetchMasterData(branchId: 1)),
+                ..add(FetchMasterData(branchId: int.tryParse(dotenv.env['BRANCH_ID'] ?? '1') ?? 1)),
         ),
         BlocProvider(
           create: (context) => ProductCustomizationBloc(MenuRepository()),
