@@ -6,9 +6,11 @@ import 'package:web_ordering/src/features/home/presentation/app.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_ordering/src/core/config/supabase_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
 
   setPathUrlStrategy();
 
