@@ -36,26 +36,24 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
     // Preserve departments visible while menu loads
     final currentDepts = state is MasterLoaded
         ? (state as MasterLoaded).departments
-        : <DepartmentModel>[];
+        : state is MasterMenuLoading
+            ? (state as MasterMenuLoading).departments
+            : <DepartmentModel>[];
 
     emit(
       MasterMenuLoading(branchId: event.branchId, departments: currentDepts),
     );
     try {
-      final categories = await _repository.fetchCategories(
-        event.branchId,
-        event.departmentId,
-      );
-      final items = await _repository.fetchItems(
-        event.branchId,
-        event.departmentId,
-      );
+      final results = await Future.wait([
+        _repository.fetchCategories(event.branchId, event.departmentId),
+        _repository.fetchItems(event.branchId, event.departmentId),
+      ]);
       emit(
         MasterLoaded(
           branchId: event.branchId,
           departments: currentDepts,
-          categories: categories,
-          items: items,
+          categories: results[0] as List<CategoryModel>,
+          items: results[1] as List<ItemModel>,
         ),
       );
     } catch (e) {

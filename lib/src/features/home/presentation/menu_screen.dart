@@ -29,19 +29,26 @@ class _MenuScreenState extends State<MenuScreen> {
     super.dispose();
   }
 
+  int _branchIdFromState() {
+    final state = context.read<MasterBloc>().state;
+    if (state is MasterLoaded) return state.branchId;
+    if (state is MasterMenuLoading) return state.branchId;
+    return 0;
+  }
+
   void _selectDepartment(int deptId) {
     if (_selectedDeptId == deptId) return;
-    // Reset index before dispatch so it's 0 when new data arrives
-    _selectedCategoryIndex = 0;
-    setState(() => _selectedDeptId = deptId);
 
-    // Read branchId from the current state (set by FetchDepartments in app.dart)
-    final currentState = context.read<MasterBloc>().state;
-    final branchId = currentState is MasterLoaded
-        ? currentState.branchId
-        : currentState is MasterMenuLoading
-        ? currentState.branchId
-        : 1; // fallback to the default branch
+    _selectedCategoryIndex = 0;
+    setState(() {
+      _selectedDeptId = deptId;
+      _isSearching = false;
+      _searchController.clear();
+      _searchQuery = '';
+    });
+
+    final branchId = _branchIdFromState();
+    if (branchId == 0) return;
 
     context.read<MasterBloc>().add(
       FetchMasterData(branchId: branchId, departmentId: deptId),
@@ -126,8 +133,34 @@ class _MenuScreenState extends State<MenuScreen> {
           return const Center(child: CircularProgressIndicator());
         }
 
+        if (state is MasterLoading || state is MasterInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         if (state is MasterError) {
-          return Center(child: Text('Error: ${state.message}'));
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Error: ${state.message}'),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () {
+                    final branchId = _branchIdFromState();
+                    if (branchId != 0 && _selectedDeptId != null) {
+                      context.read<MasterBloc>().add(
+                        FetchMasterData(
+                          branchId: branchId,
+                          departmentId: _selectedDeptId!,
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
         }
 
         if (state is MasterLoaded && state.categories.isNotEmpty) {
@@ -193,16 +226,12 @@ class _MenuScreenState extends State<MenuScreen> {
         }
 
         // MasterLoaded but categories empty for this department
-        if (state is MasterLoaded && state.categories.isEmpty) {
-          return const Center(
-            child: Text(
-              'No categories found for this department.',
-              style: TextStyle(color: Colors.grey),
-            ),
-          );
-        }
-
-        return const SizedBox.shrink();
+        return const Center(
+          child: Text(
+            'No categories found for this department.',
+            style: TextStyle(color: Colors.grey),
+          ),
+        );
       },
     );
   }
