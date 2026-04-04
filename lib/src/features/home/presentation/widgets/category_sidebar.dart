@@ -6,14 +6,19 @@ import 'package:web_ordering/src/features/menu/domain/models/category.dart';
 class CategorySidebar extends StatelessWidget {
   final List<CategoryModel> categories;
   final int selectedIndex;
+  final int? deptId;
   final ValueChanged<int> onCategorySelected;
 
   const CategorySidebar({
     super.key,
     required this.categories,
     required this.selectedIndex,
+    this.deptId,
     required this.onCategorySelected,
   });
+
+  Color get _activeColor =>
+      deptId == 2 ? const Color(0xFF4CAF50) : AppColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +45,7 @@ class CategorySidebar extends StatelessWidget {
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.transparent,
+                color: isSelected ? _activeColor : Colors.transparent,
                 borderRadius: BorderRadius.circular(5),
               ),
               child: Text(

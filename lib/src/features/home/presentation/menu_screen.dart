@@ -76,10 +76,7 @@ class _MenuScreenState extends State<MenuScreen> {
         onTap: _isSearching ? _closeSearch : null,
         child: BlocListener<MasterBloc, MasterState>(
           // Auto-select the first department when departments first load
-          listenWhen: (prev, curr) =>
-              curr is MasterLoaded &&
-              curr.departments.isNotEmpty &&
-              _selectedDeptId == null,
+          listenWhen: (prev, curr) => curr is MasterLoaded && curr.departments.isNotEmpty && _selectedDeptId == null,
           listener: (context, state) {
             if (state is MasterLoaded && state.departments.isNotEmpty) {
               _selectDepartment(state.departments.first.id);
@@ -96,8 +93,8 @@ class _MenuScreenState extends State<MenuScreen> {
                 MenuSearchBar(
                   controller: _searchController,
                   query: _searchQuery,
-                  onChanged: (value) =>
-                      setState(() => _searchQuery = value.trim().toLowerCase()),
+                  deptId: _selectedDeptId,
+                  onChanged: (value) => setState(() => _searchQuery = value.trim().toLowerCase()),
                   onClear: () => setState(() {
                     _searchController.clear();
                     _searchQuery = '';
@@ -148,8 +145,8 @@ class _MenuScreenState extends State<MenuScreen> {
                     CategorySidebar(
                       categories: state.categories,
                       selectedIndex: safeIndex,
-                      onCategorySelected: (index) =>
-                          setState(() => _selectedCategoryIndex = index),
+                      deptId: _selectedDeptId,
+                      onCategorySelected: (index) => setState(() => _selectedCategoryIndex = index),
                     ),
                   Expanded(
                     child: Column(
@@ -161,9 +158,7 @@ class _MenuScreenState extends State<MenuScreen> {
                             horizontal: 16,
                           ),
                           child: Text(
-                            _isSearching
-                                ? 'All Items'
-                                : state.categories[safeIndex].name,
+                            _isSearching ? 'All Items' : state.categories[safeIndex].name,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -177,6 +172,7 @@ class _MenuScreenState extends State<MenuScreen> {
                             isSearching: _isSearching,
                             searchQuery: _searchQuery,
                             selectedCategoryIndex: safeIndex,
+                            deptId: _selectedDeptId,
                           ),
                         ),
                       ],

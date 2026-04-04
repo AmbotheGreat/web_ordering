@@ -18,9 +18,7 @@ class MyApp extends StatelessWidget {
       providers: [
         // MasterBloc: fetches departments on startup, then categories+items on selection
         BlocProvider(
-          create: (context) =>
-              MasterBloc(MenuRepository())
-                ..add(const FetchDepartments(branchId: 1)),
+          create: (context) => MasterBloc(MenuRepository())..add(const FetchDepartments(branchId: 5)),
         ),
         BlocProvider(
           create: (context) => ProductCustomizationBloc(MenuRepository()),

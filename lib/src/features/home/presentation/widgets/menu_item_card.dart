@@ -6,9 +6,12 @@ import 'package:web_ordering/src/features/menu/domain/models/item.dart';
 /// Card widget displaying a menu item with image, name, price, and add button
 class MenuItemCard extends StatelessWidget {
   final ItemModel item;
+  final int? deptId;
   final VoidCallback? onAddPressed;
 
-  const MenuItemCard({super.key, required this.item, this.onAddPressed});
+  const MenuItemCard({super.key, required this.item, this.deptId, this.onAddPressed});
+
+  Color get _activeColor => deptId == 2 ? const Color(0xFF4CAF50) : AppColors.accent;
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +40,13 @@ class MenuItemCard extends StatelessWidget {
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Center(
-                              child: Icon(
-                                Icons.coffee,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
-                            ),
+                        errorBuilder: (context, error, stackTrace) => const Center(
+                          child: Icon(
+                            Icons.coffee,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ),
                     )
                   : const Center(
@@ -86,8 +88,8 @@ class MenuItemCard extends StatelessWidget {
                       GestureDetector(
                         onTap: onAddPressed,
                         child: Container(
-                          decoration: const BoxDecoration(
-                            color: AppColors.accent,
+                          decoration: BoxDecoration(
+                            color: _activeColor,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(

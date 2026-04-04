@@ -5,6 +5,7 @@ import 'package:web_ordering/src/core/theme/app_colors.dart';
 class MenuSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final String query;
+  final int? deptId;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
 
@@ -12,9 +13,13 @@ class MenuSearchBar extends StatelessWidget {
     super.key,
     required this.controller,
     required this.query,
+    this.deptId,
     required this.onChanged,
     required this.onClear,
   });
+
+  Color get _activeColor =>
+      deptId == 2 ? const Color(0xFF4CAF50) : AppColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +39,11 @@ class MenuSearchBar extends StatelessWidget {
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primary),
+            borderSide: BorderSide(color: _activeColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primary),
+            borderSide: BorderSide(color: _activeColor),
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,

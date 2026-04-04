@@ -15,6 +15,7 @@ class MenuItemGrid extends StatelessWidget {
   final bool isSearching;
   final String searchQuery;
   final int selectedCategoryIndex;
+  final int? deptId;
 
   const MenuItemGrid({
     super.key,
@@ -23,6 +24,7 @@ class MenuItemGrid extends StatelessWidget {
     required this.isSearching,
     required this.searchQuery,
     required this.selectedCategoryIndex,
+    this.deptId,
   });
 
   static const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
@@ -60,6 +62,7 @@ class MenuItemGrid extends StatelessWidget {
         final item = filteredItems[index];
         return MenuItemCard(
           item: item,
+          deptId: deptId,
           onAddPressed: () => context.push('/item/${item.id}', extra: item),
         );
       },

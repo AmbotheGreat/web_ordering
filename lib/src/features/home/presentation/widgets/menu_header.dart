@@ -26,6 +26,8 @@ class MenuHeader extends StatelessWidget {
     this.onBranchSelected,
   });
 
+  Color get _activeColor => selectedBranchId == 2 ? const Color(0xFF4CAF50) : AppColors.primary;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -87,6 +89,7 @@ class MenuHeader extends StatelessWidget {
                         imageUrl: dept.imageUrl,
                         isSelected: selectedBranchId == dept.id,
                         isAvailable: dept.isAvailable,
+                        deptId: dept.id,
                         onTap: () => onBranchSelected?.call(dept.id),
                       );
                     },
@@ -101,7 +104,7 @@ class MenuHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+                icon: Icon(Icons.arrow_back, color: _activeColor),
                 onPressed: () => context.go('/'),
               ),
               const Text(
@@ -114,7 +117,7 @@ class MenuHeader extends StatelessWidget {
               ),
               IconButton(
                 style: IconButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: _activeColor, // Change background color based on selected branch
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(10),
                 ),

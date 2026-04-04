@@ -8,6 +8,7 @@ class BranchCard extends StatelessWidget {
   final String? imageUrl;
   final bool isSelected;
   final bool isAvailable;
+  final int? deptId;
   final VoidCallback? onTap;
 
   const BranchCard({
@@ -16,8 +17,11 @@ class BranchCard extends StatelessWidget {
     this.imageUrl,
     required this.isSelected,
     this.isAvailable = true,
+    this.deptId,
     this.onTap,
   });
+
+  Color get _activeColor => deptId == 2 ? const Color(0xFF4CAF50) : AppColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +38,7 @@ class BranchCard extends StatelessWidget {
                 color: AppColors.backgroundWhite,
                 borderRadius: BorderRadius.circular(15),
                 border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.borderMedium,
+                  color: isSelected ? _activeColor : AppColors.borderMedium,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -54,8 +56,7 @@ class BranchCard extends StatelessWidget {
                               imageUrl!,
                               fit: BoxFit.contain,
                               width: double.infinity,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.store, size: 36),
+                              errorBuilder: (_, __, ___) => const Icon(Icons.store, size: 36),
                             )
                           : const Center(child: Icon(Icons.store, size: 36)),
                     ),
@@ -64,9 +65,7 @@ class BranchCard extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.backgroundLight,
+                      color: isSelected ? _activeColor : AppColors.backgroundLight,
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(13),
                         bottomRight: Radius.circular(13),
@@ -80,9 +79,7 @@ class BranchCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: isSelected
-                            ? AppColors.textSecondary
-                            : Colors.grey.shade600,
+                        color: isSelected ? AppColors.textSecondary : Colors.grey.shade600,
                       ),
                     ),
                   ),
