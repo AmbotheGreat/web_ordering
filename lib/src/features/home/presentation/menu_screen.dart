@@ -24,6 +24,20 @@ class _MenuScreenState extends State<MenuScreen> {
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    // If departments are already loaded when this screen is first built
+    // (e.g. bloc was pre-seeded before navigation), auto-select the first one.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_selectedDeptId != null) return;
+      final state = context.read<MasterBloc>().state;
+      if (state is MasterLoaded && state.departments.isNotEmpty) {
+        _selectDepartment(state.departments.first.id);
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();

@@ -124,14 +124,7 @@ class _CheckoutDialogState extends State<_CheckoutDialog> {
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 4),
-            Text(
-              '${cart.totalItems} item${cart.totalItems == 1 ? '' : 's'} · ₱${cart.subtotal.toStringAsFixed(2)}',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 20),
-
+            const SizedBox(height: 10),
             // Order summary
             Container(
               padding: const EdgeInsets.all(12),

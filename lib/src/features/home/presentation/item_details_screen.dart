@@ -94,6 +94,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 10),
                     // Item Image
                     Center(
                       child: Container(
