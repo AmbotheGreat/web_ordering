@@ -218,7 +218,9 @@ class _MenuScreenState extends State<MenuScreen> {
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (context) => const CartBottomSheet(),
+                  builder: (_) => CartBottomSheet(
+                    branchId: _branchIdFromState(),
+                  ),
                 ),
               ),
             ],

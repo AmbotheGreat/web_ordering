@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_ordering/src/features/cart/domain/models/cart_item.dart';
@@ -32,11 +34,12 @@ class CartService {
   Map<String, dynamic> _buildPayload(
     String customerName,
     List<CartItem> items,
+    int branchId,
   ) {
     return {
       'order_type_id': 1,
       'order_status': 1,
-      'branch_id': 1, // Currently hardcoded to 1
+      'branch_id': branchId,
       'customer_name': customerName,
       'items': items.map((item) {
         final Map<String, dynamic> itemData = {
@@ -69,31 +72,39 @@ class CartService {
   Future<String> submitOrder({
     required String customerName,
     required List<CartItem> items,
+    required int branchId,
   }) async {
     if (items.isEmpty) {
       throw Exception('Cart is empty');
     }
 
     final deviceId = await _getDeviceId();
-    final payload = _buildPayload(customerName, items);
+    final payload = _buildPayload(customerName, items, branchId);
 
-    print('=== SUBMITTING ORDER ===');
-    print('Payload: $payload');
-    print('Headers: x-device-id: $deviceId');
+    debugPrint('=== SUBMITTING ORDER ===');
+    debugPrint('Payload: $payload');
+    debugPrint('Headers: x-device-id: $deviceId');
 
-    final response = await _supabase.functions.invoke(
-      'create-self-order',
-      body: payload,
-      headers: {'x-device-id': deviceId},
-    );
+    final response = await _supabase.functions
+        .invoke(
+          'create-self-order',
+          body: payload,
+          headers: {'x-device-id': deviceId},
+        )
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw TimeoutException(
+            'Order request timed out after 30 seconds. Please try again.',
+          ),
+        );
 
-    print('=== ORDER COMPLETED ===');
-    print('Status Code: ${response.status}');
-    print('Response Data: ${response.data}');
-    print('Response Data Type: ${response.data.runtimeType}');
+    debugPrint('=== ORDER COMPLETED ===');
+    debugPrint('Status Code: ${response.status}');
+    debugPrint('Response Data: ${response.data}');
+    debugPrint('Response Data Type: ${response.data.runtimeType}');
 
     if (response.status != 200 && response.status != 201) {
-      print('Submission Error Data: ${response.data}');
+      debugPrint('Submission Error Data: ${response.data}');
       throw Exception('Failed to submit order: ${response.status}');
     }
 
@@ -104,8 +115,8 @@ class CartService {
       } catch (_) {}
     }
 
-    print('=== PARSED DATA TYPE: ${data.runtimeType} ===');
-    print('=== PARSED DATA: $data ===');
+    debugPrint('=== PARSED DATA TYPE: ${data.runtimeType} ===');
+    debugPrint('=== PARSED DATA: $data ===');
 
     // Helper to extract order_key from any map level
     String? _extractKey(dynamic d) {
@@ -134,15 +145,15 @@ class CartService {
     }
 
     final orderKey = _extractKey(data);
-    print('=== EXTRACTED ORDER KEY: "$orderKey" ===');
+    debugPrint('=== EXTRACTED ORDER KEY: "$orderKey" ===');
     if (orderKey != null && orderKey.isNotEmpty) return orderKey;
 
     if (data is String && data.isNotEmpty) {
-      print('=== DATA IS STRING: "$data" ===');
+      debugPrint('=== DATA IS STRING: "$data" ===');
       return data;
     }
 
-    print('=== WARNING: Could not extract order key from response ===');
+    debugPrint('=== WARNING: Could not extract order key from response ===');
     return '';
   }
 }

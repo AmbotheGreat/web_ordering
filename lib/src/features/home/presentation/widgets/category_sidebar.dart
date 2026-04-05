@@ -17,8 +17,7 @@ class CategorySidebar extends StatelessWidget {
     required this.onCategorySelected,
   });
 
-  Color get _activeColor =>
-      deptId == 2 ? const Color(0xFF4CAF50) : AppColors.primary;
+  Color get _activeColor => deptId == 2 ? const Color(0xFF4CAF50) : AppColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -42,20 +41,17 @@ class CategorySidebar extends StatelessWidget {
           return GestureDetector(
             onTap: () => onCategorySelected(index),
             child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 0),
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
               decoration: BoxDecoration(
                 color: isSelected ? _activeColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(5),
               ),
               child: Text(
                 categories[index].name,
                 style: TextStyle(
-                  color: isSelected
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
+                  color: isSelected ? AppColors.textSecondary : AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 8,
+                  fontSize: 10,
                 ),
                 textAlign: TextAlign.center,
               ),
