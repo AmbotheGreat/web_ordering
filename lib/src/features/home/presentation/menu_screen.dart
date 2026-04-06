@@ -194,23 +194,10 @@ class _MenuScreenState extends State<MenuScreen> {
                       deptId: _selectedDeptId,
                       onCategorySelected: (index) => setState(() => _selectedCategoryIndex = index),
                     ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 16,
-                    ),
-                    child: Text(
-                      _isSearching ? 'All Items' : state.categories[safeIndex].name,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                   Expanded(
                     child: MenuItemGrid(
                       categories: state.categories,
-                      items: state.items,
+                      items: state.items.where((item) => item.status == 1).toList(),
                       isSearching: _isSearching,
                       searchQuery: _searchQuery,
                       selectedCategoryIndex: safeIndex,

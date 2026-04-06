@@ -31,15 +31,14 @@ class MenuHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
-      color: AppColors.backgroundWhite,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      color: const Color.fromARGB(255, 255, 255, 255),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 10),
           // Dynamic department list from MasterBloc
           SizedBox(
-            height: 100,
+            height: 130,
             child: BlocBuilder<MasterBloc, MasterState>(
               builder: (context, state) {
                 if (state is MasterLoading) {
@@ -90,7 +89,7 @@ class MenuHeader extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           // Title Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,7 +103,7 @@ class MenuHeader extends StatelessWidget {
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 22,
                 ),
               ),
               IconButton(

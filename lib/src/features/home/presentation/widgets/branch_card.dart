@@ -33,7 +33,8 @@ class BranchCard extends StatelessWidget {
           children: [
             // Base card
             Container(
-              width: 100,
+              width: 150,
+              height: 250,
               decoration: BoxDecoration(
                 color: AppColors.backgroundWhite,
                 borderRadius: BorderRadius.circular(15),
@@ -41,6 +42,13 @@ class BranchCard extends StatelessWidget {
                   color: isSelected ? _activeColor : AppColors.borderMedium,
                   width: isSelected ? 2 : 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -77,7 +85,7 @@ class BranchCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: isSelected ? AppColors.textSecondary : Colors.grey.shade600,
                       ),

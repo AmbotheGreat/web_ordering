@@ -29,12 +29,12 @@ class MenuItemGrid extends StatelessWidget {
 
   static const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: 2,
-    childAspectRatio: 0.75,
+    childAspectRatio: 0.85,
     crossAxisSpacing: 15,
     mainAxisSpacing: 15,
   );
 
-  static const _padding = EdgeInsets.fromLTRB(10, 0, 10, 100);
+  static const _padding = EdgeInsets.fromLTRB(10, 10, 10, 100);
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +47,7 @@ class MenuItemGrid extends StatelessWidget {
     if (filteredItems.isEmpty) {
       return Center(
         child: Text(
-          isSearching
-              ? 'No items match your search.'
-              : 'No items in this category.',
+          isSearching ? 'No items match your search.' : 'No items in this category.',
         ),
       );
     }
@@ -72,9 +70,7 @@ class MenuItemGrid extends StatelessWidget {
   List<ItemModel> _resolveItems() {
     if (isSearching) {
       if (searchQuery.isEmpty) return items;
-      return items
-          .where((i) => i.name.toLowerCase().contains(searchQuery))
-          .toList();
+      return items.where((i) => i.name.toLowerCase().contains(searchQuery)).toList();
     }
 
     if (selectedCategoryIndex >= categories.length) return [];

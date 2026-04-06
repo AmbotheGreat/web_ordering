@@ -20,15 +20,19 @@ class CustomizationSelector extends StatefulWidget {
 }
 
 class _CustomizationSelectorState extends State<CustomizationSelector> {
-  final Set<int> _selectedOptions = {};
+  final List<int> _selectedOptions = [];
 
   void _toggleOption(int optionId) {
     setState(() {
       if (widget.customization.selectionType == 0) {
-        // Single select - replace selection
-        _selectedOptions.clear();
-        _selectedOptions.add(optionId);
-      } else {
+        // Single select - toggle off if already selected
+        if (_selectedOptions.contains(optionId)) {
+          _selectedOptions.clear();
+        } else {
+          _selectedOptions.clear();
+          _selectedOptions.add(optionId);
+        }
+      } else if (widget.customization.selectionType == 1) {
         // Multi select - toggle
         if (_selectedOptions.contains(optionId)) {
           _selectedOptions.remove(optionId);
@@ -37,7 +41,24 @@ class _CustomizationSelectorState extends State<CustomizationSelector> {
             _selectedOptions.add(optionId);
           }
         }
+      } else if (widget.customization.selectionType == 2) {
+        // Multi select repeated - increment
+        if (_selectedOptions.length < widget.customization.maxSelect) {
+          _selectedOptions.add(optionId);
+        } else {
+          // Reset to 0 when pressing again while at max capacity
+          if (_selectedOptions.contains(optionId)) {
+            _selectedOptions.removeWhere((id) => id == optionId);
+          }
+        }
       }
+      widget.onSelectionChanged(_selectedOptions.toList());
+    });
+  }
+
+  void _decrementOption(int optionId) {
+    setState(() {
+      _selectedOptions.remove(optionId);
       widget.onSelectionChanged(_selectedOptions.toList());
     });
   }
@@ -106,7 +127,7 @@ class _CustomizationSelectorState extends State<CustomizationSelector> {
 
                 if (!widget.customization.isRequired && !isSingleSelect)
                   Text(
-                    'Select up to ${widget.customization.maxSelect} *Optional',
+                    '*Optional',
                     style: TextStyle(
                       fontSize: 12,
                       color: widget.hasError
@@ -169,14 +190,24 @@ class _CustomizationSelectorState extends State<CustomizationSelector> {
                 spacing: 5,
                 runSpacing: 5,
                 children: widget.customization.options.map((option) {
-                  final isSelected = _selectedOptions.contains(option.id);
-                  final isDisabled =
-                      !isSingleSelect &&
-                      !isSelected &&
+                  final count = _selectedOptions
+                      .where((id) => id == option.id)
+                      .length;
+                  final isSelected = count > 0;
+                  final isAtMax =
                       _selectedOptions.length >= widget.customization.maxSelect;
 
+                  bool canTapMain = true;
+                  if (widget.customization.selectionType == 0) {
+                    canTapMain = true;
+                  } else if (widget.customization.selectionType == 1) {
+                    canTapMain = isSelected || !isAtMax;
+                  } else if (widget.customization.selectionType == 2) {
+                    canTapMain = isSelected || !isAtMax;
+                  }
+
                   return InkWell(
-                    onTap: isDisabled ? null : () => _toggleOption(option.id),
+                    onTap: canTapMain ? () => _toggleOption(option.id) : null,
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -198,6 +229,34 @@ class _CustomizationSelectorState extends State<CustomizationSelector> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (widget.customization.selectionType == 2 &&
+                              count > 0) ...[
+                            GestureDetector(
+                              onTap: () => _decrementOption(option.id),
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.remove,
+                                  size: 12,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${count}x',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                          ],
                           Text(
                             (widget.customization.name.toLowerCase().contains(
                                           'sugar',
@@ -209,7 +268,7 @@ class _CustomizationSelectorState extends State<CustomizationSelector> {
                                 ? '${option.name}%'
                                 : option.name,
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 12,
                               color: isSelected
                                   ? AppColors.primary
                                   : AppColors.textPrimary,
