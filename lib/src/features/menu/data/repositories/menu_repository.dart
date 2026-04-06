@@ -83,12 +83,14 @@ class MenuRepository {
         print('📋 Parsed customizations data: $customizationsData');
         print('📊 Number of customizations: ${customizationsData.length}');
 
-        return customizationsData
+        final customizations = customizationsData
             .map(
               (e) =>
                   ProductCustomizationModel.fromJson(e as Map<String, dynamic>),
             )
             .toList();
+
+        return await _enrichCustomizationsWithPrices(customizations, branchId);
       }
 
       print('⚠️ Edge function returned null data');
@@ -136,7 +138,7 @@ class MenuRepository {
                 .toList();
 
             if (customizations.isNotEmpty) {
-              customizationsMap[item.barcode!] = customizations;
+              customizationsMap[item.barcode!] = await _enrichCustomizationsWithPrices(customizations, branchId);
             }
           }
         } catch (e) {
@@ -151,5 +153,58 @@ class MenuRepository {
       // The app will still work, just without customizations
       return {};
     }
+  }
+
+  Future<List<ProductCustomizationModel>> _enrichCustomizationsWithPrices(
+    List<ProductCustomizationModel> customizations,
+    int branchId,
+  ) async {
+    final List<String> barcodesToFetch = [];
+    for (var custom in customizations) {
+      for (var opt in custom.options) {
+        if (opt.price == null && opt.priceDelta == null && opt.barcode != null && opt.barcode!.isNotEmpty) {
+          barcodesToFetch.add(opt.barcode!);
+        }
+      }
+    }
+
+    if (barcodesToFetch.isNotEmpty) {
+      try {
+        final itemsResponse = await _client
+            .from('items')
+            .select('barcode, price')
+            .eq('branch_id', branchId)
+            .inFilter('barcode', barcodesToFetch);
+
+        final Map<String, double> priceMap = {};
+        for (var item in itemsResponse as List) {
+          if (item['barcode'] != null && item['price'] != null) {
+            priceMap[item['barcode']] = (item['price'] as num).toDouble();
+          }
+        }
+
+        for (var custom in customizations) {
+          for (var i = 0; i < custom.options.length; i++) {
+            final opt = custom.options[i];
+            if (opt.price == null && opt.priceDelta == null && opt.barcode != null) {
+              final fetchedPrice = priceMap[opt.barcode];
+              if (fetchedPrice != null) {
+                custom.options[i] = CustomizationOption(
+                  id: opt.id,
+                  name: opt.name,
+                  price: fetchedPrice,
+                  priceDelta: opt.priceDelta,
+                  barcode: opt.barcode,
+                  localId: opt.localId,
+                );
+              }
+            }
+          }
+        }
+      } catch (e) {
+        print('⚠️ Failed to enrich customization prices: $e');
+      }
+    }
+    return customizations;
   }
 }

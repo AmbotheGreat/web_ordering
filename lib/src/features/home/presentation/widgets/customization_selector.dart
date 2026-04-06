@@ -277,10 +277,12 @@ class _CustomizationSelectorState extends State<CustomizationSelector> {
                                   : FontWeight.normal,
                             ),
                           ),
-                          if (option.price != null && option.price! > 0) ...[
+                          if (option.effectivePrice > 0) ...[
                             const SizedBox(width: 4),
                             Text(
-                              '(+₱${option.price!.toStringAsFixed(0)})',
+                              option.priceDelta != null 
+                                  ? '(+₱${option.priceDelta!.toStringAsFixed(0)})'
+                                  : '(₱${option.price!.toStringAsFixed(0)})',
                               style: TextStyle(
                                 fontSize: 10,
                                 color: isSelected

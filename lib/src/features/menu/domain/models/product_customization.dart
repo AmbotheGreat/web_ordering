@@ -52,6 +52,7 @@ class CustomizationOption {
   final int id;
   final String name;
   final double? price;
+  final double? priceDelta;
   final String? barcode;
   final String? localId;
 
@@ -59,23 +60,33 @@ class CustomizationOption {
     required this.id,
     required this.name,
     this.price,
+    this.priceDelta,
     this.barcode,
     this.localId,
   });
+
+  double get effectivePrice => priceDelta ?? price ?? 0.0;
+  bool get hasPriceDelta => priceDelta != null && priceDelta! > 0;
 
   factory CustomizationOption.fromJson(Map<String, dynamic> json) {
     return CustomizationOption(
       id: json['id'] ?? 0,
       name: json['label'] ?? json['name'] ?? '', // API uses 'label'
-      price: json['price_delta'] != null
-          ? (json['price_delta'] as num).toDouble()
-          : (json['price'] != null ? (json['price'] as num).toDouble() : null), // API uses 'price_delta'
+      price: json['price'] != null ? (json['price'] as num).toDouble() : null,
+      priceDelta: json['price_delta'] != null ? (json['price_delta'] as num).toDouble() : null,
       barcode: json['barcode'],
       localId: json['local_id']?.toString(), // Handle both string and int just in case
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'price': price, 'barcode': barcode, 'local_id': localId};
+    return {
+      'id': id, 
+      'name': name, 
+      'price': price, 
+      'price_delta': priceDelta, 
+      'barcode': barcode, 
+      'local_id': localId
+    };
   }
 }

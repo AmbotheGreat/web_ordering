@@ -36,7 +36,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
       final group = _customizations.firstWhere((c) => c.id == groupId);
       for (var optionId in optionIds) {
         final option = group.options.firstWhere((o) => o.id == optionId);
-        total += option.price ?? 0.0;
+        total += option.effectivePrice;
       }
     }
     return total;
@@ -371,7 +371,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
             optionName: (group.name.toLowerCase().contains('sugar')) && double.tryParse(option.name) != null
                 ? '${option.name}%'
                 : option.name,
-            priceDelta: option.price ?? 0.0,
+            priceDelta: option.effectivePrice,
             barcode: option.barcode, // Added barcode mapping
             localId: option.localId,
           ),
