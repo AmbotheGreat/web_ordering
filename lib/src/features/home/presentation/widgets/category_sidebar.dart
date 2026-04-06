@@ -24,40 +24,44 @@ class CategorySidebar extends StatelessWidget {
     if (categories.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.55,
-      width: MediaQuery.of(context).size.width * 0.2,
+      width: double.infinity,
       decoration: BoxDecoration(
+        color: Colors.white,
         border: Border(
-          right: BorderSide(color: AppColors.borderLight),
-          top: BorderSide(color: AppColors.borderLight),
           bottom: BorderSide(color: AppColors.borderLight),
         ),
       ),
-      child: ListView.builder(
-        itemCount: categories.length,
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        itemBuilder: (context, index) {
-          final isSelected = selectedIndex == index;
-          return GestureDetector(
-            onTap: () => onCategorySelected(index),
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 0),
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-              decoration: BoxDecoration(
-                color: isSelected ? _activeColor : Colors.transparent,
-              ),
-              child: Text(
-                categories[index].name,
-                style: TextStyle(
-                  color: isSelected ? AppColors.textSecondary : AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Wrap(
+          spacing: 8,
+          children: List.generate(categories.length, (index) {
+            final isSelected = selectedIndex == index;
+            return GestureDetector(
+              onTap: () => onCategorySelected(index),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: isSelected ? _activeColor : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected ? _activeColor : AppColors.borderLight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                textAlign: TextAlign.center,
+                child: Text(
+                  categories[index].name,
+                  style: TextStyle(
+                    color: isSelected ? AppColors.textSecondary : AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
-          );
-        },
+            );
+          }),
+        ),
       ),
     );
   }

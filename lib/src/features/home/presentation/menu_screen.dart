@@ -121,7 +121,6 @@ class _MenuScreenState extends State<MenuScreen> {
                     _searchQuery = '';
                   }),
                 ),
-              const Divider(height: 1),
               Expanded(child: _buildBody()),
             ],
           ),
@@ -185,7 +184,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
           return Stack(
             children: [
-              Row(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!_isSearching)
@@ -195,34 +194,27 @@ class _MenuScreenState extends State<MenuScreen> {
                       deptId: _selectedDeptId,
                       onCategorySelected: (index) => setState(() => _selectedCategoryIndex = index),
                     ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
+                    child: Text(
+                      _isSearching ? 'All Items' : state.categories[safeIndex].name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          child: Text(
-                            _isSearching ? 'All Items' : state.categories[safeIndex].name,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: MenuItemGrid(
-                            categories: state.categories,
-                            items: state.items,
-                            isSearching: _isSearching,
-                            searchQuery: _searchQuery,
-                            selectedCategoryIndex: safeIndex,
-                            deptId: _selectedDeptId,
-                          ),
-                        ),
-                      ],
+                    child: MenuItemGrid(
+                      categories: state.categories,
+                      items: state.items,
+                      isSearching: _isSearching,
+                      searchQuery: _searchQuery,
+                      selectedCategoryIndex: safeIndex,
+                      deptId: _selectedDeptId,
                     ),
                   ),
                 ],

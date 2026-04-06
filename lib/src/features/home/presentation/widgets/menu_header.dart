@@ -31,19 +31,11 @@ class MenuHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 40, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
       color: AppColors.backgroundWhite,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Select branch :',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
           const SizedBox(height: 10),
           // Dynamic department list from MasterBloc
           SizedBox(
