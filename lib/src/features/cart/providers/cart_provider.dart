@@ -30,6 +30,18 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
+  bool _areCustomizationsEqual(List<SelectedCustomization> list1, List<SelectedCustomization> list2) {
+    if (list1.length != list2.length) return false;
+    
+    final sorted1 = List.of(list1)..sort((a, b) => a.optionId.compareTo(b.optionId));
+    final sorted2 = List.of(list2)..sort((a, b) => a.optionId.compareTo(b.optionId));
+    
+    for (int i = 0; i < sorted1.length; i++) {
+        if (sorted1[i].optionId != sorted2[i].optionId) return false;
+    }
+    return true;
+  }
+
   /// Add item to cart or update quantity if already exists
   void addToCart(
     ItemModel item,
@@ -37,7 +49,7 @@ class CartProvider extends ChangeNotifier {
     List<SelectedCustomization> customizations = const [],
   }) {
     final existingIndex = _items.indexWhere(
-      (cartItem) => cartItem.item.id == item.id,
+      (cartItem) => cartItem.item.id == item.id && _areCustomizationsEqual(cartItem.selectedCustomizations, customizations),
     );
 
     if (existingIndex >= 0) {
@@ -58,19 +70,19 @@ class CartProvider extends ChangeNotifier {
   }
 
   /// Remove item from cart
-  void removeFromCart(int itemId) {
-    _items.removeWhere((cartItem) => cartItem.item.id == itemId);
+  void removeFromCart(CartItem targetItem) {
+    _items.remove(targetItem);
     notifyListeners();
   }
 
   /// Update item quantity
-  void updateQuantity(int itemId, int quantity) {
+  void updateQuantity(CartItem targetItem, int quantity) {
     if (quantity <= 0) {
-      removeFromCart(itemId);
+      removeFromCart(targetItem);
       return;
     }
 
-    final index = _items.indexWhere((cartItem) => cartItem.item.id == itemId);
+    final index = _items.indexOf(targetItem);
 
     if (index >= 0) {
       _items[index].quantity = quantity;

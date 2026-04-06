@@ -42,7 +42,7 @@ class CartItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 if (cartItem.selectedCustomizations.isNotEmpty) ...[
-                  ...cartItem.selectedCustomizations.map(_buildCustomizationRow),
+                  ..._buildCustomizationRows(),
                   const SizedBox(height: 4),
                 ],
                 _buildQuantityRow(),
@@ -86,7 +86,29 @@ class CartItemTile extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomizationRow(SelectedCustomization customization) {
+  List<Widget> _buildCustomizationRows() {
+    final grouped = <String, int>{};
+    final distinct = <String, SelectedCustomization>{};
+
+    for (var custom in cartItem.selectedCustomizations) {
+      final key = '${custom.groupId}_${custom.optionId}';
+      grouped[key] = (grouped[key] ?? 0) + 1;
+      distinct[key] = custom;
+    }
+
+    return distinct.keys.map((key) {
+      return _buildCustomizationRow(distinct[key]!, grouped[key]!);
+    }).toList();
+  }
+
+  Widget _buildCustomizationRow(
+    SelectedCustomization customization,
+    int count,
+  ) {
+    final optionText = count > 1
+        ? '${customization.optionName} (x$count)'
+        : customization.optionName;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Row(
@@ -104,16 +126,16 @@ class CartItemTile extends StatelessWidget {
                     text: '${customization.groupName}: ',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  TextSpan(text: customization.optionName),
+                  TextSpan(text: optionText),
                 ],
               ),
             ),
           ),
           if (customization.priceDelta > 0)
             Text(
-              '+₱${customization.priceDelta.toStringAsFixed(2)}',
+              '+₱${(customization.priceDelta * count).toStringAsFixed(2)}',
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 12,
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w500,
               ),
@@ -136,8 +158,7 @@ class CartItemTile extends StatelessWidget {
             children: [
               _QuantityButton(
                 icon: Icons.remove,
-                onPressed: () =>
-                    onQuantityChanged(cartItem.quantity - 1),
+                onPressed: () => onQuantityChanged(cartItem.quantity - 1),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -151,8 +172,7 @@ class CartItemTile extends StatelessWidget {
               ),
               _QuantityButton(
                 icon: Icons.add,
-                onPressed: () =>
-                    onQuantityChanged(cartItem.quantity + 1),
+                onPressed: () => onQuantityChanged(cartItem.quantity + 1),
               ),
             ],
           ),

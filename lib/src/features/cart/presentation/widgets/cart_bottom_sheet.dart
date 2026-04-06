@@ -121,7 +121,7 @@ class CartBottomSheet extends StatelessWidget {
         final cartItem = cart.items[index];
         return CartItemTile(
           cartItem: cartItem,
-          onQuantityChanged: (qty) => cart.updateQuantity(cartItem.item.id, qty),
+          onQuantityChanged: (qty) => cart.updateQuantity(cartItem, qty),
         );
       },
     );
