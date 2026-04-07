@@ -9,9 +9,15 @@ class MenuItemCard extends StatelessWidget {
   final int? deptId;
   final VoidCallback? onAddPressed;
 
-  const MenuItemCard({super.key, required this.item, this.deptId, this.onAddPressed});
+  const MenuItemCard({
+    super.key,
+    required this.item,
+    this.deptId,
+    this.onAddPressed,
+  });
 
-  Color get _activeColor => deptId == 2 ? const Color(0xFF4CAF50) : AppColors.accent;
+  Color get _activeColor =>
+      deptId == 2 ? const Color(0xFF4CAF50) : AppColors.accent;
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +53,14 @@ class MenuItemCard extends StatelessWidget {
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Center(
-                          child: Icon(
-                            Icons.coffee,
-                            size: 50,
-                            color: Colors.grey,
-                          ),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.coffee,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
+                            ),
                       ),
                     )
                   : const Center(
@@ -65,7 +72,12 @@ class MenuItemCard extends StatelessWidget {
                     ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 8, top: 0),
+              padding: const EdgeInsets.only(
+                left: 12,
+                right: 12,
+                bottom: 8,
+                top: 0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -96,7 +108,7 @@ class MenuItemCard extends StatelessWidget {
                         onTap: onAddPressed,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _activeColor,
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(

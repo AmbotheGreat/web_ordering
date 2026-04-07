@@ -13,25 +13,23 @@ class WelcomeScreen extends StatelessWidget {
         },
         child: Stack(
           children: [
-            Image.asset(
-              'assets/images/pc_bg.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
+            Container(
+              color: Colors.black,
             ),
-            Positioned(
-              bottom: 60,
-              left: 0,
-              right: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.8),
-                ),
+            Opacity(
+              opacity: 0.9,
+              child: Image.asset(
+                'assets/images/pc_bg.png',
+                fit: BoxFit.cover,
                 width: double.infinity,
-                height: 120,
-                child: Center(
-                  child: Image.asset("assets/images/startordering.png"),
-                ),
+                height: double.infinity,
+              ),
+            ),
+            Center(
+              child: Image.asset(
+                "assets/images/pc_startordering.png",
+                width: double.infinity,
+                fit: BoxFit.contain,
               ),
             ),
           ],

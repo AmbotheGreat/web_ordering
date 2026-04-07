@@ -219,8 +219,8 @@ class _QrScreenState extends State<QrScreen> {
         children: [
           // Background image
           Opacity(
-            opacity: 0.3,
-            child: Image.asset('assets/images/qrbg.png', fit: BoxFit.cover),
+            opacity: 1,
+            child: Image.asset('assets/images/pc_bg1.png', fit: BoxFit.cover),
           ),
 
           // Main card content
@@ -234,8 +234,11 @@ class _QrScreenState extends State<QrScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.black.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Colors.white,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.07),
@@ -260,15 +263,30 @@ class _QrScreenState extends State<QrScreen> {
                               ),
                             ),
                           )
-                        : _buildStatusBadge(statusLabel, statusColor),
+                        : Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 50,
+                                vertical: 8,
+                              ),
+                              child: _buildStatusBadge(
+                                statusLabel,
+                                statusColor,
+                              ),
+                            ),
+                          ),
                     const SizedBox(height: 16),
 
                     // Status message
                     Text(
                       statusMessage,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
+                        fontSize: 16,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
@@ -311,7 +329,7 @@ class _QrScreenState extends State<QrScreen> {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.5,
-                        color: AppColors.textPrimary,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -350,16 +368,9 @@ class _QrScreenState extends State<QrScreen> {
             right: 0,
             child: Center(
               child: Container(
-                width: MediaQuery.of(context).size.width * 0.3,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF396cfd),
-                  border: Border.fromBorderSide(
-                    BorderSide(color: Colors.white, width: 1),
-                  ),
-                ),
+                width: MediaQuery.of(context).size.width * 0.5,
                 child: Image.asset(
-                  'assets/images/logo.png',
+                  'assets/images/pc_logo.png',
                   fit: BoxFit.contain,
                 ),
               ),

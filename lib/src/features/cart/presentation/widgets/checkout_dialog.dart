@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:web_ordering/src/core/routing/app_router.dart';
 import 'package:web_ordering/src/core/theme/app_colors.dart';
 import 'package:web_ordering/src/features/cart/providers/cart_provider.dart';
-import 'package:web_ordering/src/features/cart/data/services/cart_service.dart' as web_ordering_cart_service;
+import 'package:web_ordering/src/features/cart/data/services/cart_service.dart'
+    as web_ordering_cart_service;
 
 Future<void> showCheckoutDialog(
   BuildContext context,
@@ -79,7 +80,10 @@ class _CheckoutDialogState extends State<_CheckoutDialog> {
       widget.cart.clearCart();
       debugPrint('>>> cart cleared, pushing /qr');
 
-      goRouter.push('/qr', extra: {'orderKey': orderKey, 'items': orderedItems});
+      goRouter.push(
+        '/qr',
+        extra: {'orderKey': orderKey, 'items': orderedItems},
+      );
       debugPrint('>>> goRouter.push done');
     } catch (e, stack) {
       debugPrint('>>> ERROR in _submit: $e');
@@ -125,63 +129,6 @@ class _CheckoutDialogState extends State<_CheckoutDialog> {
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            // Order summary
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              constraints: const BoxConstraints(maxHeight: 150),
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: cart.items.length,
-                separatorBuilder: (_, __) => Divider(height: 16, color: Colors.grey.shade200),
-                itemBuilder: (_, index) {
-                  final item = cart.items[index];
-                  return Row(
-                    children: [
-                      Container(
-                        width: 22,
-                        height: 22,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '${item.quantity}x',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          item.item.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ),
-                      Text(
-                        '₱${item.totalPrice.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-
             // Total
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -223,7 +170,10 @@ class _CheckoutDialogState extends State<_CheckoutDialog> {
                 filled: true,
                 fillColor: Colors.grey.shade50,
                 errorText: _nameError,
-                prefixIcon: const Icon(Icons.person_outline, color: Colors.grey),
+                prefixIcon: const Icon(
+                  Icons.person_outline,
+                  color: Colors.grey,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(color: Colors.grey.shade300),
@@ -234,7 +184,10 @@ class _CheckoutDialogState extends State<_CheckoutDialog> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 2,
+                  ),
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),

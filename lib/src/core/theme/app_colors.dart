@@ -5,7 +5,7 @@ class AppColors {
   AppColors._();
 
   /// Primary brand color
-  static const Color primary = Color(0xff3a6bfb);
+  static const Color primary = Color(0xff128f46);
 
   /// Text colors
   static const Color textPrimary = Colors.black;
