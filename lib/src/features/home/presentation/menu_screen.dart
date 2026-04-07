@@ -107,8 +107,6 @@ class _MenuScreenState extends State<MenuScreen> {
             children: [
               MenuHeader(
                 onSearchPressed: _toggleSearch,
-                selectedBranchId: _selectedDeptId,
-                onBranchSelected: _selectDepartment,
               ),
               if (_isSearching)
                 MenuSearchBar(
@@ -130,14 +128,6 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Widget _buildBody() {
-    if (_selectedDeptId == null) {
-      return const Center(
-        child: Text(
-          'Please select a department to view the menu.',
-          style: TextStyle(color: Colors.grey),
-        ),
-      );
-    }
 
     return BlocBuilder<MasterBloc, MasterState>(
       builder: (context, state) {
