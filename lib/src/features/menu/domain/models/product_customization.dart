@@ -71,22 +71,25 @@ class CustomizationOption {
   factory CustomizationOption.fromJson(Map<String, dynamic> json) {
     return CustomizationOption(
       id: json['id'] ?? 0,
-      name: json['label'] ?? json['name'] ?? '', // API uses 'label'
+      name: json['label'] ?? json['name'] ?? '',
       price: json['price'] != null ? (json['price'] as num).toDouble() : null,
-      priceDelta: json['price_delta'] != null ? (json['price_delta'] as num).toDouble() : null,
+      priceDelta: json['price_delta'] != null
+          ? (json['price_delta'] as num).toDouble()
+          : null,
       barcode: json['barcode'],
-      localId: json['local_id']?.toString(), // Handle both string and int just in case
+      localId: json['local_id']
+          ?.toString(), // Handle both string and int just in case
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id, 
-      'name': name, 
-      'price': price, 
-      'price_delta': priceDelta, 
-      'barcode': barcode, 
-      'local_id': localId
+      'id': id,
+      'name': name,
+      'price': price,
+      'price_delta': priceDelta,
+      'barcode': barcode,
+      'local_id': localId,
     };
   }
 }

@@ -127,7 +127,7 @@ class MenuRepository {
           if (response.data != null) {
             final List<dynamic> customizationsData = response.data is List
                 ? response.data
-                : (response.data['customizations'] ?? []);
+                : (response.data['option_groups'] ?? []);
 
             final customizations = customizationsData
                 .map(
